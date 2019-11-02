@@ -2,9 +2,9 @@ import com.sun.prism.paint.Color;
 
 import javafx.scene.shape.Circle;
 
-/*
+/**
  * This code implements a particle in the program.
- *
+ * @author Sara Dellidj
  */
 
 public class Particle extends GameObject {
