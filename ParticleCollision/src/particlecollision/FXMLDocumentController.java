@@ -40,6 +40,11 @@ public class FXMLDocumentController implements Initializable {
     private Label status = new Label();
     private Label fieldLabel = new Label();
     private Label protonData = new Label();
+    private Label pionLabel = new Label();
+    private Label kaonLabel = new Label();
+    private Label mesLabel = new Label();
+    private Label strangeLabel = new Label();
+    private Label chaLabel = new Label();
     private ArrayList<Circle> lines = new ArrayList();
     private MediaPlayer mediaPlayer;
     private AudioClip collisionSound;
@@ -207,11 +212,63 @@ public class FXMLDocumentController implements Initializable {
         fieldLabel.setTextFill(Color.WHITE);
         fieldLabel.setLayoutX(leftDataAlign);
         fieldLabel.setLayoutY(50);
+        fieldLabel.setFont(Font.font("Britannic Bold", 15));
         addToPane(fieldLabel);
         protonData.setTextFill(Color.WHITE);
         protonData.setLayoutX(leftDataAlign);
-        protonData.setLayoutY(100);
+        protonData.setLayoutY(70);
+        protonData.setFont(Font.font("Britannic Bold", 15));
         addToPane(protonData);
+        
+        int rightDataAlign = 1011 - 150;
+        Label legend = new Label("Subatomic particles");
+        legend.setTextFill(Color.WHITE);
+        legend.setFont(Font.font("Britannic Bold", 15));
+        legend.setUnderline(true);
+        legend.setLayoutX(rightDataAlign);
+        legend.setLayoutY(40);
+        addToPane(legend);
+        
+        Particle pion = new Particle(new Vector2D(rightDataAlign, 80), zero, zero, 5, "pion");
+        pionLabel.setText("Pion");
+        pionLabel.setTextFill(Color.WHITE);
+        pionLabel.setFont(Font.font("Britannic Bold", 15));
+        pionLabel.setLayoutX(rightDataAlign + 15);
+        pionLabel.setLayoutY(80 - 8);
+        Particle kaon = new Particle(new Vector2D(rightDataAlign, 100), zero, zero, 5, "kaon");
+        kaonLabel.setText("Kaon");
+        kaonLabel.setTextFill(Color.WHITE);
+        kaonLabel.setFont(Font.font("Britannic Bold", 15));
+        kaonLabel.setLayoutX(rightDataAlign + 15);
+        kaonLabel.setLayoutY(100 - 8);
+        Particle meson = new Particle(new Vector2D(rightDataAlign, 120), zero, zero, 5, "dmeson");
+        mesLabel.setText("D Meson");
+        mesLabel.setTextFill(Color.WHITE);
+        mesLabel.setFont(Font.font("Britannic Bold", 15));
+        mesLabel.setLayoutX(rightDataAlign + 15);
+        mesLabel.setLayoutY(120 - 8);        
+        Particle strange = new Particle(new Vector2D(rightDataAlign, 140), zero, zero, 5, "strangedmeson");
+        strangeLabel.setText("Strange D Meson");
+        strangeLabel.setTextFill(Color.WHITE);
+        strangeLabel.setFont(Font.font("Britannic Bold", 15));
+        strangeLabel.setLayoutX(rightDataAlign + 15);
+        strangeLabel.setLayoutY(140 - 8);         
+        Particle charmed = new Particle(new Vector2D(rightDataAlign, 160), zero, zero, 5, "charmedbmeson");
+        chaLabel.setText("Charmed B Meson");
+        chaLabel.setTextFill(Color.WHITE);
+        chaLabel.setFont(Font.font("Britannic Bold", 15));
+        chaLabel.setLayoutX(rightDataAlign + 15);
+        chaLabel.setLayoutY(160 - 8); 
+        addToPane(pionLabel);
+        addToPane(kaonLabel);
+        addToPane(mesLabel);
+        addToPane(strangeLabel);
+        addToPane(chaLabel);
+        addToPane(pion.getCircle());
+        addToPane(kaon.getCircle());
+        addToPane(meson.getCircle());
+        addToPane(strange.getCircle());
+        addToPane(charmed.getCircle());
 
         // Buttons
         restart.setText("Restart");
@@ -234,10 +291,10 @@ public class FXMLDocumentController implements Initializable {
                     removeFromPane(part.getCircle());
                 });
                 jetList.clear();
-                if (collision && !jetCollision) {
+//                if (collision && !jetCollision) {
                     removeFromPane(rightProton.getCircle());
                     removeFromPane(leftProton.getCircle());
-                }
+//                }
                 status.setText("");
                 protonData.setText("");
                 fieldLabel.setText("");
