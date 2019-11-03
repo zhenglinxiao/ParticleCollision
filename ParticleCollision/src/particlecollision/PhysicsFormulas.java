@@ -9,14 +9,11 @@ public class PhysicsFormulas {
     final private static double c = 299792458;
     
     public static void updatePosition(Particle p, double t){
-        Vector2D newPos = new Vector2D(p.getPosition().getX() + p.getVelocity().getX() * t, p.getPosition().getY() + p.getVelocity().getY() * t);
-//        Vector2D newPos = new Vector2D(p.getPosition().getX() + p.getVelocity().getX() * t + 0.5*p.getAcceleration().getX() * Math.pow(t,2),
-//                                       p.getPosition().getY() + p.getVelocity().getY() * t + 0.5*p.getAcceleration().getY() * Math.pow(t, 2));
-//        
-//        Vector2D newVel = new Vector2D(p.getVelocity().getX() + p.getAcceleration().getX() * t, p.getVelocity().getY() + p.getAcceleration().getY() * t);
+        Vector2D newPos = p.getPosition().add(p.getVelocity().mult(t)).add(p.getAcceleration().mult(Math.pow(t, 2) / 2));
+        Vector2D newVel = p.getVelocity().add(p.getAcceleration().mult(t));
         
         p.setPosition(newPos);
-//        p.setVelocity(newVel);
+        p.setVelocity(newVel);
     }
     
     public static double getMomentum(Particle p){

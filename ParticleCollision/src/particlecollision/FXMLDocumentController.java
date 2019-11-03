@@ -49,6 +49,7 @@ public class FXMLDocumentController implements Initializable {
     Vector2D zero = new Vector2D(0, 0);
     Vector2D leftIniPos = new Vector2D(200, 250);
     Vector2D rightIniPos = new Vector2D(600, 250);
+    Vector2D magneticField = new Vector2D(0, 150);
     double iniRadius = 12;
     Particle rightProton;
     Particle leftProton;
@@ -137,6 +138,7 @@ public class FXMLDocumentController implements Initializable {
                 if (jetCollision) {
                     // update jetparticles positions
                     jetList.forEach((part) -> {
+                        // line
                         Circle temp = new Circle();
                         temp.setRadius(1.5);
                         temp.setCenterX(part.getPosition().getX());
@@ -145,9 +147,11 @@ public class FXMLDocumentController implements Initializable {
                         temp.setOpacity(0.2);
                         lines.add(temp);
                         addToPane(temp);
+                        
+                        part.setAcceleration(magneticField.mult(part.getCharge()/part.getMass()));
                         PhysicsFormulas.updatePosition(part, frameDeltaTime);
                     });
-                    
+                    System.out.println(jetList.get(0).getAcceleration());
                 } else if (collision) {
                     // update right/left positions
                     leftProton.setVelocity(leftProton.getVelocity().getX() - 0.1*INC, leftProton.getVelocity().getY());

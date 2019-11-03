@@ -62,5 +62,9 @@ public class GameObject {
     public void setAcceleration(double x, double y) {
         this.acceleration = new Vector2D(x, y);
     }
+    
+    public void setAcceleration(Vector2D vect){
+        this.acceleration = vect;
+    }
 
 }
