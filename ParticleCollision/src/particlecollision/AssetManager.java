@@ -1,4 +1,3 @@
-package particlecollision;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,6 +18,7 @@ public class AssetManager {
 	 static protected ImagePattern proton = null;
 	 static private Media backgroundMusic = null;
 	 static protected ImagePattern deuteron =null;
+	 static protected AudioClip collisionEffect = null;
 	  static private String fileURL(String relativePath)
 	    {
 	        return new File(relativePath).toURI().toString();
@@ -35,6 +35,9 @@ public class AssetManager {
 		 logo = new ImagePattern(new Image(fileURL("./assets/logo.png")));
 		 proton = new ImagePattern(new Image(fileURL("./assets/proton.png")));
 		 deuteron = new ImagePattern(new Image(fileURL("./assets/deuteron.png")));
+		 backgroundMusic = new Media(fileURL("./assets/melodyloops-preview-future-discovery-2m30s.mp3"));
+		 collisionEffect = new AudioClip(fileURL("./assets/Power-Up-KP-1879176533.mp3"));
 	    }
 	 
 }
+
