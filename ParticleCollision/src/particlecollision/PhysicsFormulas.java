@@ -24,7 +24,14 @@ public class PhysicsFormulas {
     }
     
     protected static double scale(double val){
-        return val * 0.99 * c / (250);
+        double newVal = val * 0.99999 * c / (400);
+        
+        if(newVal >= c){
+            System.out.println("this");
+            newVal = 0.999 * c;
+        }
+        
+        return newVal;
     }
     
     private static double mevToKg(double meVMass){

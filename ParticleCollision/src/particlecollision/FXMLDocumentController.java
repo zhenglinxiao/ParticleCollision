@@ -9,13 +9,14 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
+import javafx.scene.text.Font;
 
 /**
  *
@@ -24,18 +25,20 @@ import javafx.scene.shape.Circle;
 public class FXMLDocumentController implements Initializable {
 
     // GUI instance variables
-    private int buttonY = 450;
+    private int buttonW = 150;
+    private int buttonH = 30;
+    private int buttonX = 1011 - buttonW - 50;
     @FXML
-    private AnchorPane pane; // 800 x 514 or 14:9 aspect ratio
+    private AnchorPane pane; 
     private Button restart = new Button();
     private Button quit = new Button();
     private Button acc = new Button();
     private Button start = new Button();
     private Label status = new Label();
     private Label fieldLabel = new Label();
-    private Slider fieldStrength = new Slider();
+    private Label protonData = new Label();
     private ArrayList<Circle> lines = new ArrayList();
-    
+
     // Animation instance variables
     private double lastFrameTime = 0.0;
     long initialTime = System.nanoTime();
@@ -44,15 +47,17 @@ public class FXMLDocumentController implements Initializable {
     private ArrayList<Particle> jetList = new ArrayList();
     private boolean collision;
     private boolean jetCollision;
+    private boolean repel;
     private Vector2D collisionPos;
-    private static int INC = 18;
-    Vector2D zero = new Vector2D(0, 0);
-    Vector2D leftIniPos = new Vector2D(200, 250);
-    Vector2D rightIniPos = new Vector2D(600, 250);
-    Vector2D magneticField = new Vector2D(0, 150);
-    double iniRadius = 12;
-    Particle rightProton;
-    Particle leftProton;
+    private static int INC = 30;
+    private Vector2D zero = new Vector2D(0, 0);
+    private Vector2D leftIniPos = new Vector2D(200, 300);
+    private Vector2D rightIniPos = new Vector2D(800, 300);
+    private Vector2D magneticField = new Vector2D(150, 0);
+    private double iniRadius = 12;
+    private Particle rightProton;
+    private Particle leftProton;
+    final private double k = 9 * Math.pow(10, 42);
 
     public void addToPane(Node node) {
         pane.getChildren().add(node);
@@ -72,6 +77,12 @@ public class FXMLDocumentController implements Initializable {
 
             // Pre-collision
             if (!collision) {
+                protonData.setText(String.format("Proton speed: %.2f", PhysicsFormulas.scale(leftProton.getVelocity().magnitude())));
+                if (repel) {
+                    double coulombs = k * Math.pow(rightProton.getCharge(), 2) / Math.pow((rightProton.getPosition().getX() - leftProton.getPosition().getX()), 2);
+                    rightProton.setAcceleration(coulombs, 0);
+                    leftProton.setAcceleration(-coulombs, 0);
+                }
                 PhysicsFormulas.updatePosition(rightProton, frameDeltaTime);
                 PhysicsFormulas.updatePosition(leftProton, frameDeltaTime);
 
@@ -83,11 +94,6 @@ public class FXMLDocumentController implements Initializable {
                     acc.setDisable(true);
                     // Calculate energy
                     switch (QuantumFormulas.typeCollision(leftProton)) {
-                        case 0:
-                            status.setText("The protons are repelling each other.");
-                            leftProton.setVelocity(-INC * 3, leftProton.getVelocity().getY());
-                            rightProton.setVelocity(INC * 3, rightProton.getVelocity().getY());
-                            break;// REPEL
                         case 1:
                             System.out.println("deuteron");
                             status.setText("You've created a deuteron!");
@@ -99,11 +105,11 @@ public class FXMLDocumentController implements Initializable {
                             break;// deuteron
                         case 2:
                             jetCollision = true;
+                            fieldLabel.setText("Magnetic Field: ON");
                             jetList.addAll(QuantumFormulas.getJetParticles(leftProton));
-                            if(jetList.size() == 0){
-                                status.setText("The collision did not generate enough energy to expel quarks.");
-                            }
-                            else{
+                            if (jetList.isEmpty()) {
+                                status.setText("Energy is too low: no quarks");
+                            } else {
                                 status.setText("You've created a jet of particles!");
                             }
                             removeFromPane(rightProton.getCircle());
@@ -112,26 +118,29 @@ public class FXMLDocumentController implements Initializable {
                         default:
                             System.out.println("type collision fail");
                     }
-                    
-                    int range = (20 + 20) + 1;
+
+                    int m = 25;
+                    int range = (m + m) + 1;
                     Vector2D pSum = new Vector2D(0, 0);
-                    for(int i = 0; i < jetList.size(); i++){
+                    for (int i = 0; i < jetList.size(); i++) {
                         Particle tmp = jetList.get(i);
                         tmp.setPosition(collisionPos);
                         tmp.getCircle().setCenterX(collisionPos.getX());
                         tmp.getCircle().setCenterY(collisionPos.getY());
                         addToPane(tmp.getCircle());
-                        
+
                         // set velocities
-                        if(i == jetList.size() - 1){
-                            Vector2D vel = (zero.sub(pSum)).mult(1/tmp.getMass());
+                        if (i == jetList.size() - 1) {
+                            Vector2D vel = (zero.sub(pSum)).mult(1 / tmp.getMass());
+                            pSum = pSum.add(vel.mult(tmp.getMass()));
                             tmp.setVelocity(vel);
-                        }else{
-                            Vector2D vel = new Vector2D(Math.random() * range - 10, Math.random() * range - 20);
+                        } else {
+                            Vector2D vel = new Vector2D(Math.random() * range - m, Math.random() * range - m);
                             tmp.setVelocity(vel);
                             pSum = pSum.add(vel.mult(tmp.getMass()));
                         }
                     }
+//                    System.out.println(pSum);
                 }
             } // Post-collision
             else {
@@ -144,25 +153,20 @@ public class FXMLDocumentController implements Initializable {
                         temp.setCenterX(part.getPosition().getX());
                         temp.setCenterY(part.getPosition().getY());
                         temp.setFill(part.getColor());
-                        temp.setOpacity(0.2);
                         lines.add(temp);
                         addToPane(temp);
-                        
-                        part.setAcceleration(magneticField.mult(part.getCharge()/part.getMass()));
+
+                        part.setAcceleration(magneticField.mult(part.getCharge() / part.getMass()));
                         PhysicsFormulas.updatePosition(part, frameDeltaTime);
                     });
-                    System.out.println(jetList.get(0).getAcceleration());
-                } else if (collision) {
-                    // update right/left positions
-                    leftProton.setVelocity(leftProton.getVelocity().getX() - 0.1*INC, leftProton.getVelocity().getY());
-                    rightProton.setVelocity(rightProton.getVelocity().getX() + 0.1*INC, rightProton.getVelocity().getY());
-                    PhysicsFormulas.updatePosition(rightProton, frameDeltaTime);
-                    PhysicsFormulas.updatePosition(leftProton, frameDeltaTime);
+                    lines.forEach((circle) -> {
+                        circle.setOpacity(circle.getOpacity() - 0.002);
+                    });
                 }
             }
         }
     };
-    
+
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         lastFrameTime = 0.0f;
@@ -177,17 +181,32 @@ public class FXMLDocumentController implements Initializable {
         addToPane(leftProton.getCircle());
 
         // Labels
-        status.setText("");
         status.setTextFill(Color.WHITE);
-        status.setLayoutX(350);
-        status.setLayoutY(100);
+        status.setLayoutX(0);
+        status.setPrefWidth(1011);
+        status.setLayoutY(580);
+        status.setAlignment(Pos.CENTER);
+        status.setFont(Font.font("Balls on the rampage", 35));
         addToPane(status);
+        
+        int leftDataAlign = 50;
+        fieldLabel.setTextFill(Color.WHITE);
+        fieldLabel.setLayoutX(leftDataAlign);
+        fieldLabel.setLayoutY(50);
+        addToPane(fieldLabel);
+        protonData.setTextFill(Color.WHITE);
+        protonData.setLayoutX(leftDataAlign);
+        protonData.setLayoutY(100);
+        addToPane(protonData);
 
         // Buttons
-        restart.setText("Restart simulation");
-        restart.setLayoutX(350);
-        restart.setLayoutY(buttonY);
+        restart.setText("Restart");
+        restart.setPrefWidth(buttonW);
+        restart.setPrefHeight(buttonH);
+        restart.setLayoutX(buttonX);
+        restart.setLayoutY(550);
         restart.setDisable(true);
+        restart.setFont(Font.font("Balls on the rampage", 25));
         restart.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -206,21 +225,27 @@ public class FXMLDocumentController implements Initializable {
                     removeFromPane(leftProton.getCircle());
                 }
                 status.setText("");
+                protonData.setText("");
+                fieldLabel.setText("");
                 rightProton = new Particle(rightIniPos, zero, zero, iniRadius, "proton");
                 leftProton = new Particle(leftIniPos, zero, zero, iniRadius, "proton");
                 addToPane(rightProton.getCircle());
                 addToPane(leftProton.getCircle());
                 collision = false;
                 jetCollision = false;
+                repel = false;
                 start.setDisable(false);
                 acc.setDisable(true);
                 restart.setDisable(true);
             }
         });
 
-        quit.setText("Quit simulation");
-        quit.setLayoutX(500);
-        quit.setLayoutY(buttonY);
+        quit.setText("Quit");
+        quit.setPrefWidth(buttonW);
+        quit.setPrefHeight(buttonH);
+        quit.setLayoutX(buttonX);
+        quit.setLayoutY(600);
+        quit.setFont(Font.font("Balls on the rampage", 25));
         quit.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -228,30 +253,40 @@ public class FXMLDocumentController implements Initializable {
             }
         });
 
-        start.setText("Start simulation");
-        start.setLayoutX(60);
-        start.setLayoutY(buttonY);
+        start.setText("Start");
+        start.setPrefWidth(buttonW);
+        start.setPrefHeight(buttonH);
+        start.setLayoutX(50);
+        start.setLayoutY(550);
+        start.setFont(Font.font("Balls on the rampage", 25));
         start.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 System.out.println("Starting...");
+                protonData.setText("Proton speed: 0");
+                fieldLabel.setText("Magnetic Field: OFF");
                 restart.setDisable(false);
                 acc.setDisable(false);
                 start.setDisable(true);
+                repel = false;
                 collision = false;
                 jetCollision = false;
                 anim.start();
             }
         });
 
-        acc.setText("Click to accerelate!!");
-        acc.setLayoutX(200);
-        acc.setLayoutY(buttonY);
+        acc.setText("Accelerate!");
+        acc.setPrefWidth(buttonW);
+        acc.setPrefHeight(buttonH);
+        acc.setLayoutX(50);
+        acc.setLayoutY(600);
         acc.setDisable(true);
+        acc.setFont(Font.font("Balls on the rampage", 25));
         acc.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 System.out.println("Clicking...");
+                repel = true;
                 leftProton.setVelocity(leftProton.getVelocity().getX() + INC, leftProton.getVelocity().getY());
                 rightProton.setVelocity(rightProton.getVelocity().getX() - INC, rightProton.getVelocity().getY());
             }

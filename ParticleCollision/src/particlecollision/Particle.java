@@ -32,7 +32,9 @@ public class Particle extends GameObject {
     final private double c = 299792458;
 
     public double getMinimalEnergy() {
-        return minimalEnergy;
+        double tmp =  this.mass;
+        System.out.println(tmp);
+        return tmp;
     }
     
     public double getMass(){
@@ -65,42 +67,42 @@ public class Particle extends GameObject {
             case "pion":
                 this.circle.setFill(Color.GREEN);
                 this.color = Color.GREEN;
-                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mPion * Math.pow(c, 2); //MeV
+//                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mPion * Math.pow(c, 2); //MeV
                 this.mass = mPion; 
                 this.charge = sign * e;
                 break;
             case "kaon":
                 this.circle.setFill(Color.BLUE);
                 this.color = Color.BLUE;
-                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mKaon * Math.pow(c, 2);
+//                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mKaon * Math.pow(c, 2);
                 this.mass = mKaon;
                 this.charge = sign * e;
                 break;
             case "dmeson":
                 this.circle.setFill(Color.AQUAMARINE);
                 this.color = Color.AQUAMARINE;
-                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mDMeson * Math.pow(c, 2);
+//                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mDMeson * Math.pow(c, 2);
                 this.mass = mDMeson;
                 this.charge = sign * e;
                 break;
             case "strangedmeson":
                 this.circle.setFill(Color.CHARTREUSE);
                 this.color = Color.CHARTREUSE;
-                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mStrangeDMeson * Math.pow(c, 2);
+//                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mStrangeDMeson * Math.pow(c, 2);
                 this.mass = mStrangeDMeson;
                 this.charge = -1 * e / 3;
                 break;
             case "charmedbmeson":
                 this.circle.setFill(Color.DEEPPINK);
                 this.color = Color.DEEPPINK;
-                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mCharmedBMeson * Math.pow(c, 2);
+//                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mCharmedBMeson * Math.pow(c, 2);
                 this.mass = mCharmedBMeson;
                 this.charge = 2 * e / 3;
                 break;
             case "proton":
                 this.circle.setFill(AssetManager.proton);
                 this.minimalEnergy = 2 * mP * Math.pow(c, 2);
-                this.charge = e;
+                this.charge = e * Math.pow(10, -19);
                 break;
             default:
                 break;

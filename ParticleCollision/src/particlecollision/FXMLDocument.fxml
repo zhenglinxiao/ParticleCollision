@@ -3,4 +3,4 @@
 <?import javafx.scene.layout.AnchorPane?>
 
 
-<AnchorPane id="AnchorPane" fx:id="pane" prefHeight="514.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="particlecollision.FXMLDocumentController" />
+<AnchorPane id="AnchorPane" fx:id="pane" prefHeight="650.0" prefWidth="1011.0" xmlns="http://javafx.com/javafx/10.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="particlecollision.FXMLDocumentController" />
