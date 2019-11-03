@@ -14,6 +14,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 
 /**
  *
@@ -25,32 +27,29 @@ public class FXMLDocumentController implements Initializable {
     private int buttonY = 450;
     @FXML
     private AnchorPane pane; // 800 x 514 or 14:9 aspect ratio
-    @FXML
     private Button restart = new Button();
-    @FXML
     private Button quit = new Button();
-    @FXML
     private Button acc = new Button();
-    @FXML
     private Button start = new Button();
-    @FXML
+    private Label status = new Label();
     private Label fieldLabel = new Label();
-    @FXML
     private Slider fieldStrength = new Slider();
-
+    private ArrayList<Circle> lines = new ArrayList();
+    
     // Animation instance variables
     private double lastFrameTime = 0.0;
     long initialTime = System.nanoTime();
 
-    // Game mechanics instance variables
-    private ArrayList<Particle> partList = new ArrayList();
-    private ArrayList<Particle> jetPart = new ArrayList();
+    // Sim mechanics instance variables
+    private ArrayList<Particle> jetList = new ArrayList();
     private boolean collision;
-    final private int ACCINCREMENT = 5;
+    private boolean jetCollision;
+    private Vector2D collisionPos;
+    private static int INC = 18;
     Vector2D zero = new Vector2D(0, 0);
-    Vector2D leftIniPos = new Vector2D(200, 300);
-    Vector2D rightIniPos = new Vector2D(600, 300);
-    double iniRadius = 8;
+    Vector2D leftIniPos = new Vector2D(200, 250);
+    Vector2D rightIniPos = new Vector2D(600, 250);
+    double iniRadius = 12;
     Particle rightProton;
     Particle leftProton;
 
@@ -70,34 +69,96 @@ public class FXMLDocumentController implements Initializable {
             double frameDeltaTime = currentTime - lastFrameTime;
             lastFrameTime = currentTime;
 
-//            System.out.println(collision);
-            // Update particle locations
-            if (!collision) {
-                //set position to getnewposition(Particle, frameDeltaTime)
-                PhysicsFormulas.updatePosition(rightProton, frameDeltaTime);
-                PhysicsFormulas.updatePosition(leftProton, frameDeltaTime);
-//                System.out.println(right.getPosition());
-            } else {
-
-            }
-
             // Pre-collision
             if (!collision) {
+                PhysicsFormulas.updatePosition(rightProton, frameDeltaTime);
+                PhysicsFormulas.updatePosition(leftProton, frameDeltaTime);
+
                 // Check when initial particles collide
                 if (rightProton.getPosition().getX() - rightProton.getCircle().getRadius() <= leftProton.getPosition().getX() + leftProton.getCircle().getRadius()) {
-                    // get energy and momentum
-                    // Collision animation thing
+                    // Collision animation thing?
                     collision = true;
-                    // Calculate energy using sara's methods
+                    collisionPos = new Vector2D(rightProton.getPosition().getX() - rightProton.getCircle().getRadius(), rightProton.getPosition().getY());
+                    acc.setDisable(true);
+                    // Calculate energy
+                    switch (QuantumFormulas.typeCollision(leftProton)) {
+                        case 0:
+                            status.setText("The protons are repelling each other.");
+                            leftProton.setVelocity(-INC * 3, leftProton.getVelocity().getY());
+                            rightProton.setVelocity(INC * 3, rightProton.getVelocity().getY());
+                            break;// REPEL
+                        case 1:
+                            System.out.println("deuteron");
+                            status.setText("You've created a deuteron!");
+                            Particle deuteron = new Particle(collisionPos, zero, zero, 30, "else");
+                            deuteron.getCircle().setFill(AssetManager.deuteron);
+                            removeFromPane(rightProton.getCircle());
+                            removeFromPane(leftProton.getCircle());
+                            jetList.add(deuteron);
+                            break;// deuteron
+                        case 2:
+                            jetCollision = true;
+                            jetList.addAll(QuantumFormulas.getJetParticles(leftProton));
+                            if(jetList.size() == 0){
+                                status.setText("The collision did not generate enough energy to expel quarks.");
+                            }
+                            else{
+                                status.setText("You've created a jet of particles!");
+                            }
+                            removeFromPane(rightProton.getCircle());
+                            removeFromPane(leftProton.getCircle());
+                            break;// jet particles!!!!!
+                        default:
+                            System.out.println("type collision fail");
+                    }
                     
+                    int range = (20 + 20) + 1;
+                    Vector2D pSum = new Vector2D(0, 0);
+                    for(int i = 0; i < jetList.size(); i++){
+                        Particle tmp = jetList.get(i);
+                        tmp.setPosition(collisionPos);
+                        tmp.getCircle().setCenterX(collisionPos.getX());
+                        tmp.getCircle().setCenterY(collisionPos.getY());
+                        addToPane(tmp.getCircle());
+                        
+                        // set velocities
+                        if(i == jetList.size() - 1){
+                            Vector2D vel = (zero.sub(pSum)).mult(1/tmp.getMass());
+                            tmp.setVelocity(vel);
+                        }else{
+                            Vector2D vel = new Vector2D(Math.random() * range - 10, Math.random() * range - 20);
+                            tmp.setVelocity(vel);
+                            pSum = pSum.add(vel.mult(tmp.getMass()));
+                        }
+                    }
                 }
             } // Post-collision
             else {
-
+                if (jetCollision) {
+                    // update jetparticles positions
+                    jetList.forEach((part) -> {
+                        Circle temp = new Circle();
+                        temp.setRadius(1.5);
+                        temp.setCenterX(part.getPosition().getX());
+                        temp.setCenterY(part.getPosition().getY());
+                        temp.setFill(part.getColor());
+                        temp.setOpacity(0.2);
+                        lines.add(temp);
+                        addToPane(temp);
+                        PhysicsFormulas.updatePosition(part, frameDeltaTime);
+                    });
+                    
+                } else if (collision) {
+                    // update right/left positions
+                    leftProton.setVelocity(leftProton.getVelocity().getX() - 0.1*INC, leftProton.getVelocity().getY());
+                    rightProton.setVelocity(rightProton.getVelocity().getX() + 0.1*INC, rightProton.getVelocity().getY());
+                    PhysicsFormulas.updatePosition(rightProton, frameDeltaTime);
+                    PhysicsFormulas.updatePosition(leftProton, frameDeltaTime);
+                }
             }
         }
     };
-
+    
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         lastFrameTime = 0.0f;
@@ -111,6 +172,13 @@ public class FXMLDocumentController implements Initializable {
         addToPane(rightProton.getCircle());
         addToPane(leftProton.getCircle());
 
+        // Labels
+        status.setText("");
+        status.setTextFill(Color.WHITE);
+        status.setLayoutX(350);
+        status.setLayoutY(100);
+        addToPane(status);
+
         // Buttons
         restart.setText("Restart simulation");
         restart.setLayoutX(350);
@@ -121,17 +189,25 @@ public class FXMLDocumentController implements Initializable {
             public void handle(ActionEvent event) {
                 System.out.println("Restarting...");
                 anim.stop();
-                jetPart.forEach((part) -> {
+                lines.forEach((circle) -> {
+                    removeFromPane(circle);
+                });
+                lines.clear();
+                jetList.forEach((part) -> {
                     removeFromPane(part.getCircle());
                 });
-                jetPart.clear();
-                removeFromPane(rightProton.getCircle());
-                removeFromPane(leftProton.getCircle());
+                jetList.clear();
+                if (collision && !jetCollision) {
+                    removeFromPane(rightProton.getCircle());
+                    removeFromPane(leftProton.getCircle());
+                }
+                status.setText("");
                 rightProton = new Particle(rightIniPos, zero, zero, iniRadius, "proton");
                 leftProton = new Particle(leftIniPos, zero, zero, iniRadius, "proton");
                 addToPane(rightProton.getCircle());
                 addToPane(leftProton.getCircle());
                 collision = false;
+                jetCollision = false;
                 start.setDisable(false);
                 acc.setDisable(true);
                 restart.setDisable(true);
@@ -158,6 +234,8 @@ public class FXMLDocumentController implements Initializable {
                 restart.setDisable(false);
                 acc.setDisable(false);
                 start.setDisable(true);
+                collision = false;
+                jetCollision = false;
                 anim.start();
             }
         });
@@ -170,9 +248,8 @@ public class FXMLDocumentController implements Initializable {
             @Override
             public void handle(ActionEvent event) {
                 System.out.println("Clicking...");
-                leftProton.setAcceleration(leftProton.getAcceleration().getX() + ACCINCREMENT, leftProton.getAcceleration().getY());
-                rightProton.setAcceleration(rightProton.getAcceleration().getX() - ACCINCREMENT, rightProton.getAcceleration().getY());
-                System.out.println(rightProton.getAcceleration());
+                leftProton.setVelocity(leftProton.getVelocity().getX() + INC, leftProton.getVelocity().getY());
+                rightProton.setVelocity(rightProton.getVelocity().getX() - INC, rightProton.getVelocity().getY());
             }
         });
 

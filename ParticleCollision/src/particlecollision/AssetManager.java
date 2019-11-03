@@ -1,3 +1,5 @@
+package particlecollision;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
@@ -12,18 +14,18 @@ import javafx.scene.media.Media;
 import javafx.scene.paint.ImagePattern;
 
 public class AssetManager {
-	 static private Background backgroundImage = null;
-	 static private ImagePattern logo = null;
+	 static protected Background backgroundImage = null;
+	 static protected ImagePattern logo = null;
 	 static protected ImagePattern proton = null;
 	 static private Media backgroundMusic = null;
-	 static private ImagePattern deuteron =null;
+	 static protected ImagePattern deuteron =null;
 	  static private String fileURL(String relativePath)
 	    {
 	        return new File(relativePath).toURI().toString();
 	    }
 	 static public void preloadAllAssets()
 	    {
-		 Image background = new Image(fileURL("./assets/background.png"));
+		 Image background = new Image(fileURL("./assets/backgroundsmall.png"));
 		 backgroundImage = new Background(
                  new BackgroundImage(background, 
                                      BackgroundRepeat.ROUND, 
