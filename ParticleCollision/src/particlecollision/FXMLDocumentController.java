@@ -14,9 +14,12 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.media.AudioClip;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
+import javafx.util.Duration;
 
 /**
  *
@@ -29,7 +32,7 @@ public class FXMLDocumentController implements Initializable {
     private int buttonH = 30;
     private int buttonX = 1011 - buttonW - 50;
     @FXML
-    private AnchorPane pane; 
+    private AnchorPane pane;
     private Button restart = new Button();
     private Button quit = new Button();
     private Button acc = new Button();
@@ -38,6 +41,8 @@ public class FXMLDocumentController implements Initializable {
     private Label fieldLabel = new Label();
     private Label protonData = new Label();
     private ArrayList<Circle> lines = new ArrayList();
+    private MediaPlayer mediaPlayer;
+    private AudioClip collisionSound;
 
     // Animation instance variables
     private double lastFrameTime = 0.0;
@@ -88,7 +93,7 @@ public class FXMLDocumentController implements Initializable {
 
                 // Check when initial particles collide
                 if (rightProton.getPosition().getX() - rightProton.getCircle().getRadius() <= leftProton.getPosition().getX() + leftProton.getCircle().getRadius()) {
-                    // Collision animation thing?
+                    collisionSound.play();
                     collision = true;
                     collisionPos = new Vector2D(rightProton.getPosition().getX() - rightProton.getCircle().getRadius(), rightProton.getPosition().getY());
                     acc.setDisable(true);
@@ -173,6 +178,15 @@ public class FXMLDocumentController implements Initializable {
 
         AssetManager.preloadAllAssets();
         pane.setBackground(AssetManager.backgroundImage);
+        collisionSound =  AssetManager.collisionEffect;
+        mediaPlayer = new MediaPlayer(AssetManager.backgroundMusic);
+        mediaPlayer.setOnEndOfMedia(new Runnable() {
+            @Override
+            public void run() {
+                mediaPlayer.seek(Duration.ZERO);
+            }
+        });
+        mediaPlayer.play();
 
         // Initial particles
         rightProton = new Particle(rightIniPos, zero, zero, iniRadius, "proton");
@@ -188,7 +202,7 @@ public class FXMLDocumentController implements Initializable {
         status.setAlignment(Pos.CENTER);
         status.setFont(Font.font("Balls on the rampage", 35));
         addToPane(status);
-        
+
         int leftDataAlign = 50;
         fieldLabel.setTextFill(Color.WHITE);
         fieldLabel.setLayoutX(leftDataAlign);
@@ -204,7 +218,7 @@ public class FXMLDocumentController implements Initializable {
         restart.setPrefWidth(buttonW);
         restart.setPrefHeight(buttonH);
         restart.setLayoutX(buttonX);
-        restart.setLayoutY(550);
+        restart.setLayoutY(520);
         restart.setDisable(true);
         restart.setFont(Font.font("Balls on the rampage", 25));
         restart.setOnAction(new EventHandler<ActionEvent>() {
@@ -244,7 +258,7 @@ public class FXMLDocumentController implements Initializable {
         quit.setPrefWidth(buttonW);
         quit.setPrefHeight(buttonH);
         quit.setLayoutX(buttonX);
-        quit.setLayoutY(600);
+        quit.setLayoutY(570);
         quit.setFont(Font.font("Balls on the rampage", 25));
         quit.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -257,7 +271,7 @@ public class FXMLDocumentController implements Initializable {
         start.setPrefWidth(buttonW);
         start.setPrefHeight(buttonH);
         start.setLayoutX(50);
-        start.setLayoutY(550);
+        start.setLayoutY(520);
         start.setFont(Font.font("Balls on the rampage", 25));
         start.setOnAction(new EventHandler<ActionEvent>() {
             @Override
@@ -279,7 +293,7 @@ public class FXMLDocumentController implements Initializable {
         acc.setPrefWidth(buttonW);
         acc.setPrefHeight(buttonH);
         acc.setLayoutX(50);
-        acc.setLayoutY(600);
+        acc.setLayoutY(570);
         acc.setDisable(true);
         acc.setFont(Font.font("Balls on the rampage", 25));
         acc.setOnAction(new EventHandler<ActionEvent>() {

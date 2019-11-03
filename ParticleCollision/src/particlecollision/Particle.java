@@ -65,22 +65,22 @@ public class Particle extends GameObject {
         
         switch (name) {
             case "pion":
-                this.circle.setFill(Color.GREEN);
-                this.color = Color.GREEN;
+                    this.circle.setFill(Color.AQUAMARINE);
+                this.color = Color.AQUAMARINE;
 //                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mPion * Math.pow(c, 2); //MeV
                 this.mass = mPion; 
                 this.charge = sign * e;
                 break;
             case "kaon":
-                this.circle.setFill(Color.BLUE);
-                this.color = Color.BLUE;
+                this.circle.setFill(Color.MEDIUMORCHID);
+                    this.color = Color.MEDIUMORCHID;
 //                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mKaon * Math.pow(c, 2);
                 this.mass = mKaon;
                 this.charge = sign * e;
                 break;
             case "dmeson":
-                this.circle.setFill(Color.AQUAMARINE);
-                this.color = Color.AQUAMARINE;
+                this.circle.setFill(Color.YELLOW);
+                this.color = Color.YELLOW;
 //                this.minimalEnergy = 2 * mP * Math.pow(c, 2) + mDMeson * Math.pow(c, 2);
                 this.mass = mDMeson;
                 this.charge = sign * e;
